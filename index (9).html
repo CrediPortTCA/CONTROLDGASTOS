@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Finanzas Personal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-6">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+            <h1 class="text-3xl font-semibold text-gray-900 mb-2">Control de Finanzas Semanal</h1>
+            <p class="text-gray-600">Gestiona tus ingresos semanales y gastos de forma clara y sencilla</p>
+        </div>
+
+        <!-- Ingresos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+            <h2 class="text-xl font-medium text-gray-900 mb-6 flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                Ingresos Totales
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ingresos Semanales ($)</label>
+                    <input type="number" id="ingresos" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg" placeholder="0.00" oninput="calcular()">
+                </div>
+                <div class="bg-green-50 rounded-xl p-4">
+                    <div class="text-sm text-green-700 font-medium">Total de Ingresos</div>
+                    <div class="text-2xl font-semibold text-green-800" id="totalIngresos">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gastos y Deducciones -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+            <h2 class="text-xl font-medium text-gray-900 mb-6 flex items-center">
+                <span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                Gastos y Deducciones
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Taxes -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700">Taxes (Manual) ($)</label>
+                    <input type="number" id="taxes" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00" oninput="calcular()">
+                </div>
+
+                <!-- Gastos Operativos -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700">Gastos Operativos de Traslado ($)</label>
+                    <input type="number" id="gastosOperativos" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00" oninput="calcular()">
+                </div>
+
+                <!-- Variable 250-300 -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700">Gasto Variable ($250-$300)</label>
+                    <input type="number" id="gastoVariable" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="275.00" min="250" max="300" value="275" oninput="calcular()">
+                    <div class="text-xs text-gray-500">Rango recomendado: $250 - $300</div>
+                </div>
+
+                <!-- Ahorro (20% automático) -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700">Ahorro (20% automático)</label>
+                    <div class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600" id="ahorro">$0.00</div>
+                    <div class="text-xs text-gray-500">Se calcula automáticamente como 20% de ingresos semanales</div>
+                </div>
+            </div>
+
+            <!-- Total Gastos -->
+            <div class="mt-6 bg-red-50 rounded-xl p-4">
+                <div class="text-sm text-red-700 font-medium">Total de Gastos y Deducciones</div>
+                <div class="text-2xl font-semibold text-red-800" id="totalGastos">$0.00</div>
+            </div>
+        </div>
+
+        <!-- Resumen Final -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+            <h2 class="text-xl font-medium text-gray-900 mb-6 flex items-center">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                Resumen Final
+            </h2>
+            
+            <!-- Configuración de Nombres -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Primera Nómina</label>
+                    <input type="text" id="nombreNomina1" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nómina 1" oninput="actualizarNombres()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Segunda Nómina</label>
+                    <input type="text" id="nombreNomina2" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nómina 2" oninput="actualizarNombres()">
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-blue-50 rounded-xl p-6 text-center">
+                    <div class="text-sm text-blue-700 font-medium mb-2">Disponible Total</div>
+                    <div class="text-3xl font-bold text-blue-800" id="disponibleTotal">$0.00</div>
+                </div>
+                
+                <div class="bg-purple-50 rounded-xl p-6 text-center">
+                    <div class="text-sm text-purple-700 font-medium mb-2" id="labelNomina1">Nómina 1</div>
+                    <div class="text-3xl font-bold text-purple-800" id="nomina1">$0.00</div>
+                </div>
+                
+                <div class="bg-purple-50 rounded-xl p-6 text-center">
+                    <div class="text-sm text-purple-700 font-medium mb-2" id="labelNomina2">Nómina 2</div>
+                    <div class="text-3xl font-bold text-purple-800" id="nomina2">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Botón de Descarga -->
+            <div class="mb-6 text-center">
+                <button onclick="descargarExcel()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-xl transition-colors duration-200 flex items-center mx-auto space-x-2 shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>Descargar Desglose en Excel</span>
+                </button>
+            </div>
+
+            <!-- Desglose Detallado -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Desglose Detallado</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Ingresos Totales:</span>
+                        <span class="font-medium" id="desglose-ingresos">$0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">- Taxes:</span>
+                        <span class="font-medium text-red-600" id="desglose-taxes">$0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">- Gastos Operativos:</span>
+                        <span class="font-medium text-red-600" id="desglose-operativos">$0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">- Gasto Variable:</span>
+                        <span class="font-medium text-red-600" id="desglose-variable">$0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">- Ahorro (20%):</span>
+                        <span class="font-medium text-blue-600" id="desglose-ahorro">$0.00</span>
+                    </div>
+                    <div class="flex justify-between py-3 border-t-2 border-gray-300 font-semibold text-lg">
+                        <span class="text-gray-900">Disponible para Nóminas:</span>
+                        <span class="text-blue-800" id="desglose-disponible">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function actualizarNombres() {
+            const nombre1 = document.getElementById('nombreNomina1').value || 'Nómina 1';
+            const nombre2 = document.getElementById('nombreNomina2').value || 'Nómina 2';
+            
+            document.getElementById('labelNomina1').textContent = nombre1;
+            document.getElementById('labelNomina2').textContent = nombre2;
+        }
+
+        function calcular() {
+            // Obtener valores
+            const ingresos = parseFloat(document.getElementById('ingresos').value) || 0;
+            const taxes = parseFloat(document.getElementById('taxes').value) || 0;
+            const gastosOperativos = parseFloat(document.getElementById('gastosOperativos').value) || 0;
+            const gastoVariable = parseFloat(document.getElementById('gastoVariable').value) || 275;
+            
+            // Calcular ahorro (20% de ingresos)
+            const ahorro = ingresos * 0.20;
+            
+            // Calcular totales
+            const totalGastos = taxes + gastosOperativos + gastoVariable + ahorro;
+            const disponibleTotal = ingresos - totalGastos;
+            
+            // Dividir en 2 nóminas
+            const nomina1 = disponibleTotal / 2;
+            const nomina2 = disponibleTotal / 2;
+            
+            // Actualizar interfaz
+            document.getElementById('totalIngresos').textContent = `$${ingresos.toFixed(2)}`;
+            document.getElementById('ahorro').textContent = `$${ahorro.toFixed(2)}`;
+            document.getElementById('totalGastos').textContent = `$${totalGastos.toFixed(2)}`;
+            document.getElementById('disponibleTotal').textContent = `$${disponibleTotal.toFixed(2)}`;
+            document.getElementById('nomina1').textContent = `$${nomina1.toFixed(2)}`;
+            document.getElementById('nomina2').textContent = `$${nomina2.toFixed(2)}`;
+            
+            // Actualizar desglose
+            document.getElementById('desglose-ingresos').textContent = `$${ingresos.toFixed(2)}`;
+            document.getElementById('desglose-taxes').textContent = `-$${taxes.toFixed(2)}`;
+            document.getElementById('desglose-operativos').textContent = `-$${gastosOperativos.toFixed(2)}`;
+            document.getElementById('desglose-variable').textContent = `-$${gastoVariable.toFixed(2)}`;
+            document.getElementById('desglose-ahorro').textContent = `-$${ahorro.toFixed(2)}`;
+            document.getElementById('desglose-disponible').textContent = `$${disponibleTotal.toFixed(2)}`;
+            
+            // Cambiar color si el disponible es negativo
+            const elementos = [document.getElementById('disponibleTotal'), document.getElementById('nomina1'), document.getElementById('nomina2')];
+            elementos.forEach(elemento => {
+                if (disponibleTotal < 0) {
+                    elemento.classList.remove('text-blue-800', 'text-purple-800');
+                    elemento.classList.add('text-red-600');
+                } else {
+                    elemento.classList.remove('text-red-600');
+                    if (elemento.id === 'disponibleTotal') {
+                        elemento.classList.add('text-blue-800');
+                    } else {
+                        elemento.classList.add('text-purple-800');
+                    }
+                }
+            });
+        }
+        
+        // Función para descargar Excel
+        function descargarExcel() {
+            try {
+                // Obtener valores actuales
+                const ingresos = parseFloat(document.getElementById('ingresos').value) || 0;
+                const taxes = parseFloat(document.getElementById('taxes').value) || 0;
+                const gastosOperativos = parseFloat(document.getElementById('gastosOperativos').value) || 0;
+                const gastoVariable = parseFloat(document.getElementById('gastoVariable').value) || 275;
+                const ahorro = ingresos * 0.20;
+                const totalGastos = taxes + gastosOperativos + gastoVariable + ahorro;
+                const disponibleTotal = ingresos - totalGastos;
+                const nomina1 = disponibleTotal / 2;
+                const nomina2 = disponibleTotal / 2;
+                
+                // Obtener nombres personalizados
+                const nombreNomina1 = document.getElementById('nombreNomina1').value || 'Nómina 1';
+                const nombreNomina2 = document.getElementById('nombreNomina2').value || 'Nómina 2';
+                
+                // Obtener fecha actual
+                const ahora = new Date();
+                const fecha = ahora.toLocaleDateString('es-ES');
+                const fechaArchivo = ahora.getFullYear() + '-' + 
+                                   String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
+                                   String(ahora.getDate()).padStart(2, '0');
+                
+                // Crear contenido HTML para Excel
+                const excelContent = `
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                            margin: 20px; 
+                            background-color: #f8f9fa;
+                        }
+                        .container { 
+                            background-color: white; 
+                            padding: 30px; 
+                            border-radius: 8px; 
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }
+                        .title { 
+                            text-align: center; 
+                            color: #2c3e50; 
+                            font-size: 24px; 
+                            font-weight: bold; 
+                            margin-bottom: 10px;
+                            border-bottom: 3px solid #3498db;
+                            padding-bottom: 15px;
+                        }
+                        .subtitle { 
+                            text-align: center; 
+                            color: #7f8c8d; 
+                            font-size: 14px; 
+                            margin-bottom: 30px;
+                        }
+                        table { 
+                            border-collapse: collapse; 
+                            width: 100%; 
+                            margin-bottom: 25px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        }
+                        .section-header { 
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white; 
+                            font-weight: bold; 
+                            text-align: center; 
+                            padding: 15px;
+                            font-size: 16px;
+                            letter-spacing: 1px;
+                        }
+                        .income-header { 
+                            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                        }
+                        .expense-header { 
+                            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+                        }
+                        .summary-header { 
+                            background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+                        }
+                        .row-item { 
+                            padding: 12px 15px; 
+                            border-bottom: 1px solid #ecf0f1;
+                            background-color: #fdfdfd;
+                        }
+                        .row-item:nth-child(even) { 
+                            background-color: #f8f9fa;
+                        }
+                        .concept { 
+                            font-weight: 500; 
+                            color: #2c3e50;
+                            width: 70%;
+                        }
+                        .amount { 
+                            text-align: right; 
+                            font-weight: bold; 
+                            font-size: 14px;
+                            width: 30%;
+                        }
+                        .positive { 
+                            color: #27ae60; 
+                            background-color: #d5f4e6;
+                            padding: 8px 12px;
+                            border-radius: 4px;
+                        }
+                        .negative { 
+                            color: #e74c3c;
+                            background-color: #fadbd8;
+                            padding: 8px 12px;
+                            border-radius: 4px;
+                        }
+                        .total-row { 
+                            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                            color: white;
+                            font-weight: bold;
+                            font-size: 16px;
+                        }
+                        .total-row td { 
+                            padding: 15px;
+                            border: none;
+                        }
+                        .spacer { 
+                            height: 20px; 
+                            border: none;
+                            background: transparent;
+                        }
+                        .final-summary { 
+                            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin-top: 20px;
+                            text-align: center;
+                        }
+                        .final-amount { 
+                            font-size: 24px; 
+                            font-weight: bold; 
+                            margin: 10px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="title">CONTROL DE FINANZAS SEMANAL</div>
+                        <div class="subtitle">Reporte generado el ${fecha}</div>
+                        
+                        <table>
+                            <tr><td colspan="2" class="section-header income-header">💰 INGRESOS</td></tr>
+                            <tr class="row-item">
+                                <td class="concept">Ingresos Semanales</td>
+                                <td class="amount positive">$${ingresos.toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL INGRESOS</strong></td>
+                                <td class="amount"><strong>$${ingresos.toFixed(2)}</strong></td>
+                            </tr>
+                        </table>
+                        
+                        <table>
+                            <tr><td colspan="2" class="section-header expense-header">📊 GASTOS Y DEDUCCIONES</td></tr>
+                            <tr class="row-item">
+                                <td class="concept">Taxes</td>
+                                <td class="amount negative">$${taxes.toFixed(2)}</td>
+                            </tr>
+                            <tr class="row-item">
+                                <td class="concept">Gastos Operativos de Traslado</td>
+                                <td class="amount negative">$${gastosOperativos.toFixed(2)}</td>
+                            </tr>
+                            <tr class="row-item">
+                                <td class="concept">Gasto Variable</td>
+                                <td class="amount negative">$${gastoVariable.toFixed(2)}</td>
+                            </tr>
+                            <tr class="row-item">
+                                <td class="concept">Ahorro Automático (20%)</td>
+                                <td class="amount" style="color: #3498db; background-color: #ebf3fd; padding: 8px 12px; border-radius: 4px;">$${ahorro.toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL GASTOS Y DEDUCCIONES</strong></td>
+                                <td class="amount"><strong>$${totalGastos.toFixed(2)}</strong></td>
+                            </tr>
+                        </table>
+                        
+                        <table>
+                            <tr><td colspan="2" class="section-header summary-header">📈 RESUMEN FINAL</td></tr>
+                            <tr class="row-item">
+                                <td class="concept">Disponible Total</td>
+                                <td class="amount ${disponibleTotal >= 0 ? 'positive' : 'negative'}">$${disponibleTotal.toFixed(2)}</td>
+                            </tr>
+                            <tr class="row-item">
+                                <td class="concept">${nombreNomina1} (50%)</td>
+                                <td class="amount ${nomina1 >= 0 ? 'positive' : 'negative'}">$${nomina1.toFixed(2)}</td>
+                            </tr>
+                            <tr class="row-item">
+                                <td class="concept">${nombreNomina2} (50%)</td>
+                                <td class="amount ${nomina2 >= 0 ? 'positive' : 'negative'}">$${nomina2.toFixed(2)}</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="final-summary">
+                            <div style="font-size: 18px; font-weight: bold; color: #2c3e50;">💼 DISTRIBUCIÓN SEMANAL</div>
+                            <div class="final-amount ${disponibleTotal >= 0 ? 'positive' : 'negative'}">
+                                Disponible: $${disponibleTotal.toFixed(2)}
+                            </div>
+                            <div style="font-size: 14px; color: #7f8c8d; margin-top: 10px;">
+                                ${nombreNomina1}: $${nomina1.toFixed(2)} | ${nombreNomina2}: $${nomina2.toFixed(2)} | Ahorro: $${ahorro.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>`;
+                
+                // Crear y descargar archivo
+                const blob = new Blob([excelContent], { 
+                    type: 'application/vnd.ms-excel;charset=utf-8' 
+                });
+                
+                // Crear enlace de descarga
+                const enlace = document.createElement('a');
+                const url = window.URL.createObjectURL(blob);
+                enlace.href = url;
+                enlace.download = `Desglose_Finanzas_${fechaArchivo}.xls`;
+                
+                // Agregar al DOM, hacer clic y remover
+                document.body.appendChild(enlace);
+                enlace.click();
+                document.body.removeChild(enlace);
+                
+                // Limpiar URL
+                window.URL.revokeObjectURL(url);
+                
+                // Mostrar confirmación
+                alert('¡Archivo descargado exitosamente!');
+                
+            } catch (error) {
+                console.error('Error al descargar:', error);
+                alert('Hubo un error al descargar el archivo. Por favor, intenta de nuevo.');
+            }
+        }
+        
+        // Inicializar cálculos
+        calcular();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97872e4f520b7445',t:'MTc1Njc1NTAxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
